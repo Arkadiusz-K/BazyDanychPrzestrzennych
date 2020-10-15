@@ -1,0 +1,209 @@
+-- Created by Vertabelo (http://vertabelo.com)
+-- Last modification date: 2020-10-14 14:57:28.586
+
+-- tables
+-- Table: godziny
+CREATE TABLE godziny (
+    id_godziny int  NOT NULL,
+    liczba_godzin int  NOT NULL,
+    pracownicy_id_pracownika int  NOT NULL,
+    CONSTRAINT godziny_pk PRIMARY KEY (id_godziny)
+);
+
+-- Table: pensja_stanowisko
+CREATE TABLE pensja_stanowisko (
+    id_pensji int  NOT NULL,
+    stanowisko varchar  NOT NULL,
+    pensja int  NOT NULL,
+    CONSTRAINT pensja_stanowisko_pk PRIMARY KEY (id_pensji)
+);
+
+-- Table: pracownicy
+CREATE TABLE pracownicy (
+    id_pracownika int  NOT NULL,
+    imie varchar  NOT NULL,
+    nazwisko varchar  NOT NULL,
+    adres varchar  NOT NULL,
+    telefon varchar  NOT NULL,
+    CONSTRAINT pracownicy_pk PRIMARY KEY (id_pracownika)
+);
+
+-- Table: premia
+CREATE TABLE premia (
+    id_premii int  NOT NULL,
+    rodzaj varchar  NOT NULL,
+    kwota int  NOT NULL,
+    CONSTRAINT premia_pk PRIMARY KEY (id_premii)
+);
+
+-- Table: wynagrodzenie
+CREATE TABLE wynagrodzenie (
+    id_wynagrodzenia int  NOT NULL,
+    data date  NOT NULL,
+    pracownicy_id_pracownika int  NOT NULL,
+    godziny_id_godziny int  NOT NULL,
+    premia_id_premii int  NOT NULL,
+    pensja_stanowisko_id_pensji int  NOT NULL,
+    CONSTRAINT wynagrodzenie_pk PRIMARY KEY (id_wynagrodzenia)
+);
+
+-- foreign keys
+-- Reference: godziny_pracownicy (table: godziny)
+ALTER TABLE godziny ADD CONSTRAINT godziny_pracownicy
+    FOREIGN KEY (pracownicy_id_pracownika)
+    REFERENCES pracownicy (id_pracownika)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: wynagrodzenie_godziny (table: wynagrodzenie)
+ALTER TABLE wynagrodzenie ADD CONSTRAINT wynagrodzenie_godziny
+    FOREIGN KEY (godziny_id_godziny)
+    REFERENCES godziny (id_godziny)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: wynagrodzenie_pensja_stanowisko (table: wynagrodzenie)
+ALTER TABLE wynagrodzenie ADD CONSTRAINT wynagrodzenie_pensja_stanowisko
+    FOREIGN KEY (pensja_stanowisko_id_pensji)
+    REFERENCES pensja_stanowisko (id_pensji)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: wynagrodzenie_pracownicy (table: wynagrodzenie)
+ALTER TABLE wynagrodzenie ADD CONSTRAINT wynagrodzenie_pracownicy
+    FOREIGN KEY (pracownicy_id_pracownika)
+    REFERENCES pracownicy (id_pracownika)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
+-- Reference: wynagrodzenie_premia (table: wynagrodzenie)
+ALTER TABLE wynagrodzenie ADD CONSTRAINT wynagrodzenie_premia
+    FOREIGN KEY (premia_id_premii)
+    REFERENCES premia (id_premii)  
+    NOT DEFERRABLE 
+    INITIALLY IMMEDIATE
+;
+
+-- End of file.
+
+ CREATE DATABASE s287407;
+ CREATE SCHEMA firma;
+ CREATE SCHEMA sklep;
+ \i /home/student/Pobrane/zad1.sql
+
+INSERT INTO producenci(id_producenta,nazwa_producenta,mail,telefon) VALUES
+(1,'dadas','a@onet.pl','133333221'),
+(2,'bayer','f@onet.pl','987987987'),
+(3,'lewandowski','lewy@gmail.com','123135132'),
+(4,'lewy',l@o.pl','143653654'),
+(5,'inny',i@onet.pl','432543654'),
+(6,'tryeyt','aaa@gmail.com','432689424'),
+(7,'pirania','pirania@interia.eu','111555333'),
+(8,'grosik','gr@onet.pl','777444191'),
+(9,'szczesny','szcz@onet.pl','555090323'),
+(10,'glik','glik@interia.pl','222888333');
+
+INSERT INTO produkty(id_produktu,nazwa_produktu,cena,producenci_id_producenta) VALUES
+(1,'p1',22,1),
+(2,'p2',32,4),
+(3,'p3',2,2),
+(4,'p4',324,3),
+(5,'p5',1,2),
+(6,'p6',2,9),
+(7,'p7',10,8),
+(8,'p8',5,4),
+(9,'p9',7,10),
+(10,'p10',4,7);
+
+INSERT INTO zamowienia(id_zamowienia,data,ilosc,produkty_id_produktu) VALUES
+(1,'2020-01-14',5,3),
+(2,'2020-01-10',10,6),
+(3,'2020-01-10',14,2),
+(4,'2020-01-10',10,3),
+(5,'2020-01-10',5,5),
+(6,'2020-01-10',4,10),
+(7,'2020-01-10',2,2),
+(8,'2020-01-10',6,1),
+(9,'2020-01-10',9,9),
+(10,'2020-01-10',10,10);
+
+-- 7
+pg_dump -C --format custom -U postgres -d s287407 -f s287407_backup.dmp
+
+-- 8
+psql -U postgres -c 'DROP DATABASE s287407;'
+
+-- 9
+pg_restore -C -d postgres -U postgres s287407_backup.dmp
+psql --dbname postgres -c 'ALTER DATABASE s287407 RENAME TO backup_s287407;'
+
+-- 10
+ALTER DATABASE backup_s287407 RENAME TO s287407;
+
+-- 11
+SELECT CONCAT('Producent: ', nazwa_producenta, ', liczba zamowien: ', SUM(ilosc), ', wartosc zamowienia: ', SUM(ilosc*cena)) FROM zamowienia RIGHT JOIN produkty ON produkty.id_produktu=zamowienia.produkty_id_produktu RIGHT JOIN producenci ON producenci.id_producenta = produkty.producenci_id_producenta;-- GROUP BY producenci.id_producenta;
+SELECT CONCAT('Produkt: ', nazwa_produktu, ', liczba zamowien: ', COUNT(id_zamowienia)) FROM produkty INNER JOIN zamowienia ON produkty.id_produktu=zamowienia.produkty_id_produktu GROUP BY produkty.nazwa_produktu;
+SELECT * FROM produkty NATURAL JOIN zamowienia;
+SELECT * FROM sklep.zamowienia WHERE DATE_PART('month', data) = 1;
+SELECT SUM(ilosc*cena),DATE_PART('d', data) AS dzien FROM zamowienia INNER JOIN produkty ON id_produktu = produkty_id_produktu GROUP BY dzien;
+SELECT nazwa_produktu, COUNT(id_zamowienia) FROM zamowienia INNER JOIN produkty ON id_produktu = produkty_id_produktu GROUP BY nazwa_produktu ORDER BY COUNT(id_zamowienia) DESC;
+
+-- 12
+SELECT CONCAT('Produkt ', UPPER(nazwa_produktu), ' którego producentem jest ', LOWER(nazwa_producenta), ', zamówiono ', COUNT(ilosc), ' razy') AS opis FROM produkty INNER JOIN producenci ON id_producenta = producenci_id_producenta INNER JOIN zamowienia ON id_produktu = produkty_id_produktu GROUP BY nazwa_produktu, nazwa_producenta ORDER BY COUNT(ilosc) DESC;
+SELECT * FROM zamowienia INNER JOIN produkty ON id_produktu=produkty_id_produktu ORDER BY (cena*ilosc ) DESC LIMIT (SELECT COUNT(*) FROM zamowienia) - 3;
+CREATE TABLE klienci (id_klienta SERIAL PRIMARY KEY, email VARCHAR, telefon VARCHAR);
+ALTER TABLE zamowienia ADD COLUMN klienci_id_klienta INT REFERENCES klienci(id_klienta);
+INSERT INTO klienci(email,numer_telefonu) VALUES
+('lewy@onet.pl','138546268'),('sasasa@interia.pl','222333111'),('b@wp.pl','33322663'),('dddd@sas.pl','999000999');
+UPDATE zamowienia SET klienci_id_klienta = 1 WHERE id_zamowienia = 1;
+UPDATE zamowienia SET klienci_id_klienta = 2 WHERE id_zamowienia = 2;
+UPDATE zamowienia SET klienci_id_klienta = 3 WHERE id_zamowienia = 3;
+UPDATE zamowienia SET klienci_id_klienta = 4 WHERE id_zamowienia = 4;
+SELECT klienci.*, nazwa_produktu, ilosc, SUM(cena*ilosc) AS wartosc_zamowienia FROM klienci INNER JOIN zamowienia ON id_klienta = klienci_id_klienta INNER JOIN produkty ON produkty_id_produktu = id_produktu GROUP BY id_klienta, nazwa_produktu, ilosc;
+SELECT CONCAT('NAJCZESCIEJ ZAMAWIAJACY: ', id_klienta, ', ilosc zamowien: ', COUNT(id_zamowienia), ', wartosc: ', SUM(ilosc*cena)) FROM zamowienia INNER JOIN klienci ON id_klienta = klienci_id_klienta INNER JOIN produkty ON produkty_id_produktu = id_produktu GROUP BY id_klienta ORDER BY COUNT(id_zamowienia) DESC LIMIT 1;
+DELETE FROM produkty WHERE id_produktu IN (SELECT produkty_id_produktu FROM zamowienia RIGHT JOIN produkty ON id_produktu = produkty_id_produktu GROUP BY produkty_id_produktu HAVING COUNT(id_zamowienia) = 0);
+
+-- 13
+CREATE TABLE numer (liczba DECIMAL(4,0));
+CREATE SEQUENCE liczba_seq INCREMENT BY 5  MINVALUE 0 MAXVALUE 125 START WITH 100 CYCLE;
+DO $$
+BEGIN
+   FOR i IN 1..7 LOOP
+      INSERT INTO numer VALUES (nextval('liczba_seq'));                   
+   END LOOP;
+END $$;
+ALTER SEQUENCE liczba_seq INCREMENT BY 6;
+SELECT nextval('liczba_seq');
+DROP SEQUENCE liczba_seq;
+
+-- 14
+SELECT usename FROM pg_shadow;
+CREATE USER superuser287407 SUPERUSER LOGIN PASSWORD 'superuser';
+CREATE USER guest287407 LOGIN PASSWORD 'guest';
+GRANT CONNECT ON DATABASE s287407 TO guest287407;
+GRANT USAGE ON SCHEMA sklep, firma  TO guest287407;
+SELECT usename FROM pg_catalog.pg_user;
+ALTER USER superuser287407  WITH NOSUPERUSER;
+ALTER USER superuser287407 RENAME TO student;
+ALTER USER student PASSWORD 'student';
+GRANT CONNECT ON DATABASE s287407 TO student;
+GRANT USAGE ON SCHEMA sklep, firma  TO student;
+DROP USER guest287407;
+
+-- 15
+BEGIN;
+UPDATE produkty SET cena=cena+10;
+COMMIT;
+BEGIN;
+UPDATE produkty SET cena = cena*1.1 WHERE id_produktu=3;
+SAVEPOINT S1;
+UPDATE zamowienia SET ilosc = ilosc*1.25;
+SAVEPOINT S2;
+DELETE FROM klienci WHERE id_klienta IN (SELECT zamowienia.id_klienta FROM klienci INNER JOIN zamowienia ON zamowienia.id_klienta = klienci.id_klienta 
+GROUP BY zamowienia.id_klienta ORDER BY zamowienia.id_klienta DESC LIMIT 1);
+ROLLBACK TO SAVEPOINT S1;
+ROLLBACK;
