@@ -1,0 +1,12 @@
+-- 4
+CREATE TABLE tableB AS SELECT popp.* FROM popp, majrivers GROUP BY(popp.gid) HAVING popp.f_codedesc = 'Building' AND MIN(ST_Distance(popp.geom, majrivers.geom)) < 100000;
+
+-- 5
+CREATE TABLE airportsNew(gid SERIAL, name VARCHAR(100), geom GEOMETRY, elev NUMERIC);
+SELECT name FROM airportsNew WHERE ST_X(geom) = (SELECT MAX(ST_X(geom)) FROM airportsNew) OR ST_X(geom) = (SELECT MIN(ST_X(geom)) FROM airportsNew);
+INSERT INTO airportsNew VALUES('airportB',ST_LineInterpolatePoints(ST_MakeLine((SELECT geom FROM airportsNew WHERE ST_X(geom) = (SELECT MAX(ST_X(geom)) FROM airportsNew)),
+	    (SELECT geom FROM airportsNew WHERE ST_X(geom) = (SELECT MIN(ST_X(geom)) FROM airportsNew))), 0.5, false), 87);
+
+-- 6
+SELECT ST_Area(ST_Buffer(ST_ShortestLine( (SELECT geom FROM lakes WHERE names LIKE 'Iliamna Lake'),
+ (SELECT geom FROM airports WHERE name LIKE 'AMBLER')), 1000)) AS pole;
