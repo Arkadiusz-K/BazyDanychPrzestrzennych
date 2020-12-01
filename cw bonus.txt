@@ -1,0 +1,12 @@
+-- zad 1
+SELECT matchid, player FROM gole WHERE teamid LIKE 'POL';
+-- zad 2
+SELECT * FROM mecze INNER JOIN gole ON mecze.id=gole.matchid WHERE gole.player LIKE 'Jakub Blaszczykowski' AND mecze.id='1004';
+-- zad 3
+SELECT player, teamname, stadium, mdate FROM mecze INNER JOIN gole ON mecze.id=gole.matchid INNER JOIN druzyny ON druzyny.id=gole.teamid
+WHERE druzyny.teamname LIKE 'Poland';
+-- zad 4
+SELECT player,team1,team2 FROM mecze INNER JOIN gole ON mecze.id=gole.matchid WHERE player LIKE 'Mario%';
+-- zad 5
+SELECT player, teamid, coach, gtime FROM gole INNER JOIN druzyny ON gole.teamid = druzyny.id WHERE gtime<=10 ORDER BY gtime ASC;
+
