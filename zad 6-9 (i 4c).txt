@@ -1,0 +1,15 @@
+zad 4c
+Features -> Show detected on map
+
+zad 6
+Trzeba skorzystaæ z "przeciêcia linii" i wybraæ majrivers i railroads
+
+zad 7
+Trzeba u¿yæ funkcji "wydob¹dŸ wierzcho³ki" (znajduje siê w narzêdziach geometrii). Wynik: 662
+
+zad 8
+Jest to ró¿nica airports - railroads (po stworzeniu dla nich buforów)
+
+zad 9
+1294 ró¿nicy (po uproszczeniu)
+dosz³o te¿ do zmiany powierzchni, ale ró¿nica to tylko 1.9 km2
